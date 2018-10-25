@@ -64,25 +64,26 @@ public class CrawlData {
 
     public void crawlURLOracle(String url) throws IOException, BoilerpipeProcessingException {
 
-        Document oracledocs= Jsoup.connect(url).get();
-        Elements oracleqlinks= oracledocs.select("div#PageContent>ul>li>ul>li>a[href],div#PageContent>ul>li>ul>li>ul>li>a[href]");
+        Document oracle = Jsoup.connect(url).get();
 
-        //parsing title of page url..
-        int a = 0;
-        String[] titles = new String[oracleqlinks.size()];
-        for (Element links : oracleqlinks) {
-            String[] splits = links.attr("abs:href").split("/");
-            titles[a] = splits[splits.length - 1];
-            titles[a] = titles[a].replace(".html", "");
-            a++;
+        Elements oracleLinks= oracle.select("div#PageContent>ul>li>ul>li>a[href],div#PageContent>ul>li>ul>li>ul>li>a[href]");
+
+        int len = 0;
+
+
+        String[] titles = new String[oracleLinks.size()];
+        for (Element link : oracleLinks) {
+            String[] split = link.attr("abs:href").split("/");
+            titles[len] = split[split.length - 1];
+            titles[len] = titles[len].replace(".html", "");
+            len++;
         }
 
-        //creating text article document for each link
-        int parts = 0;
+        int temp = 0;
 
-        for (Element links : oracleqlinks) {
+        for (Element link : oracleLinks) {
 
-            Document document = Jsoup.connect(links.attr("abs:href")).get();
+            Document document = Jsoup.connect(link.attr("abs:href")).get();
 
             document.select("div#MainFlow>div.PrintHeaders,div#MainFlow>div.BreadCrumbs,div#MainFlow>div.NavBit,div#MainFlow>div.PageTitle")
                     .remove();
@@ -95,25 +96,21 @@ public class CrawlData {
 
             File Library = new File("/Users/dharmeshch/Desktop/Crawler/Oracle");
 
-            //for each link...process
             for (int x = 0; x < totalPageParts; x++) {
 
                 if ( pageParts.get(x).split("\\s+").length > 300) {
 
                     pageParts.get(x).replaceAll("../../", "https://docs.oracle.com/javase/tutorial/");
-
-
-                    //Fetching article through boilerpipe library with Default extractor
-
+                    
                     String article = DefaultExtractor.INSTANCE.getText(pageParts.get(x));
 
-                    PrintWriter writer = new PrintWriter(Library + "/" + titles[parts] + "_part" + x + "_oracle.txt",
+                    PrintWriter writer = new PrintWriter(Library + "/" + titles[temp] + "_part" + x + "_oracle.txt",
                             "UTF-8");
                     writer.println(article);
                     writer.close();
                 }
             }
-            parts++;
+            temp++;
         }
     }
 }

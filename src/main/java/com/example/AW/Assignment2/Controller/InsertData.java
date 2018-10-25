@@ -33,6 +33,6 @@ public class InsertData {
     @RequestMapping(value = "/getIndexedData", method = RequestMethod.GET)
     public List<ESModel> getIndexedData(@RequestParam(value = "value") String value){
 //        return javaRepository.findAllByContent(value);
-        return javaRepository.findByContentType(value);
+        return data.createQueryForES(value);
     }
 }

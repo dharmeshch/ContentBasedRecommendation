@@ -27,13 +27,13 @@ public class CrawlData {
             }
 
             if(ele.attr("abs:href").contains("wiki/Java_Programming")){
-                crawlURL(ele.attr("abs:href"));
+                crawlURLJava(ele.attr("abs:href"));
             }
         }
 
     }
 
-    public void crawlURL(String url) throws IOException, BoilerpipeProcessingException {
+    public void crawlURLJava(String url) throws IOException, BoilerpipeProcessingException {
 
         String title = url.replace("https://en.wikibooks.org/wiki/Java_Programming/","");
         String titleArray[] = title.split("/");
@@ -59,6 +59,61 @@ public class CrawlData {
                 writer.close();
             }
 
+        }
+    }
+
+    public void crawlURLOracle(String url) throws IOException, BoilerpipeProcessingException {
+
+        Document oracledocs= Jsoup.connect(url).get();
+        Elements oracleqlinks= oracledocs.select("div#PageContent>ul>li>ul>li>a[href],div#PageContent>ul>li>ul>li>ul>li>a[href]");
+
+        //parsing title of page url..
+        int a = 0;
+        String[] titles = new String[oracleqlinks.size()];
+        for (Element links : oracleqlinks) {
+            String[] splits = links.attr("abs:href").split("/");
+            titles[a] = splits[splits.length - 1];
+            titles[a] = titles[a].replace(".html", "");
+            a++;
+        }
+
+        //creating text article document for each link
+        int parts = 0;
+
+        for (Element links : oracleqlinks) {
+
+            Document document = Jsoup.connect(links.attr("abs:href")).get();
+
+            document.select("div#MainFlow>div.PrintHeaders,div#MainFlow>div.BreadCrumbs,div#MainFlow>div.NavBit,div#MainFlow>div.PageTitle")
+                    .remove();
+
+            Elements page = document.select("div#MainFlow>*");
+
+            List<String> pageParts = Arrays.asList(page.toString().replaceAll("../../", "https://docs.oracle.com/javase/tutorial/").split("<h[0-9]>.*?h[0-9]>|<p><br></p>"));
+
+            int totalPageParts=pageParts.size();
+
+            File Library = new File("/Users/dharmeshch/Desktop/Crawler/Oracle");
+
+            //for each link...process
+            for (int x = 0; x < totalPageParts; x++) {
+
+                if ( pageParts.get(x).split("\\s+").length > 300) {
+
+                    pageParts.get(x).replaceAll("../../", "https://docs.oracle.com/javase/tutorial/");
+
+
+                    //Fetching article through boilerpipe library with Default extractor
+
+                    String article = DefaultExtractor.INSTANCE.getText(pageParts.get(x));
+
+                    PrintWriter writer = new PrintWriter(Library + "/" + titles[parts] + "_part" + x + "_oracle.txt",
+                            "UTF-8");
+                    writer.println(article);
+                    writer.close();
+                }
+            }
+            parts++;
         }
     }
 }

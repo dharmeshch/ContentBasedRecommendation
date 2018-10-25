@@ -1,19 +1,24 @@
 package com.example.AW.Assignment2.Model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.stereotype.Component;
 
 @Document(indexName = "java")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ESModel {
 
     @Id
-    String id;
+    String _id;
 
     String title;
 
     String content;
 
+    public ESModel(){
+
+    }
 
     public ESModel(String title, String content){
         this.title  = title;

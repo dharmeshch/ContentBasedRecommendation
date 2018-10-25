@@ -21,4 +21,11 @@ public class CrawlerController {
         crawlData.crawlData("https://en.wikibooks.org/wiki/Java_Programming");
         return "check";
     }
+
+    @RequestMapping(value = "/crawlOracleData", method = RequestMethod.POST)
+    public String crawlOracleData() throws IOException, BoilerpipeProcessingException {
+
+        crawlData.crawlURLOracle("https://docs.oracle.com/javase/tutorial/java/TOC.html");
+        return "check1";
+    }
 }
